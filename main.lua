@@ -3,15 +3,27 @@ button = require("button")
 carrot = require("carrot")
 
 math.randomseed(os.time())
+world = love.physics.newWorld(0, 9.81 * 64, true)
 
 -- main mavi charimiz
 char = {
-	x = 160,
-	y = 160,
 	height = 209,
 	width = 225,
-	speed = 120
+	speed = 130,
+	body = love.physics.newBody(world, 100, 100, "dynamic"),
+	shape = love.physics.newRectangleShape(160, 160),
+	--x = 100,
+	--y = 100,
 }
+
+char.fixture = love.physics.newFixture(char.body, char.shape)
+
+ground = {
+	body = love.physics.newBody(world, 0, 900, "static"),
+	shape = love.physics.newRectangleShape(800, 50), 
+}
+
+ground.fixture = love.physics.newFixture(ground.body, ground.shape)
 
 gate = {
 	x = 1150,
@@ -49,7 +61,7 @@ function love.load()
 
 	--spriteSheet = love.graphics.newImage("gfx/fail-anim.png")
 
-	run_bg = love.graphics.newImage("gfx/run-bg.png")
+	run_bg = love.graphics.newImage("gfx/bg-sur.png")
 	menu_bg = love.graphics.newImage("gfx/rect5.png")
 
 	char.sprite = love.graphics.newImage("gfx/char-bad.png")
@@ -70,6 +82,12 @@ end
 
 function love.update(dt)
 
+	char.x = char.body:getX()
+	char.y = char.body:getY()
+	char.body:setFixedRotation(true)
+
+	world:update(dt)
+
 	mouse_x, mouse_y = love.mouse.getPosition()
 
 -- play click edende
@@ -78,25 +96,27 @@ function love.update(dt)
 	end
 
 -- char move
-	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
+	vx, vy = char.body:getLinearVelocity()
+	--[[if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
 		char.y = char.y - char.speed*dt
 	end
 	if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
 		char.y = char.y + char.speed*dt
-	end
+	end ]]--
 	if love.keyboard.isDown("a") or love.keyboard.isDown("left") then
-		char.x = char.x - char.speed*dt
+		vx = -char.speed
 	end
 	if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
-		 char.x = char.x + char.speed*dt
+		vx = char.speed
+	else
+		vx = 0
 	end
+	char.body:setLinearVelocity(vx, vy)
 
 -- enemies de move 
 	for i = 1, #enemies do
-		if char.x ~= 160 then
-			if char.y ~= 160 then
+		if char.x > 160 or char.y > 160 then
 				enemies[i]:move(char.x, char.y)
-			end
 		end
 	end
 

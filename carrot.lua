@@ -4,7 +4,7 @@ function carrot()
 		height = 100,
 		width = 45,
 		x = math.random(1, 18) * 80,
-		y = math.random(1, 15) * 80,
+		y = 800,
 
 		draw = function(self)
 			love.graphics.draw(self.sprite, self.x, self.y)

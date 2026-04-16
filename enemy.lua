@@ -29,8 +29,8 @@ function enemy()
 		end,
 
 		hit = function(self, charx, chary, charw, charh)
-			if self.x >= charx and self.x <= charx + charw then
-				if self.y >= chary and self.y <= chary + charh then
+			if self.x + 30>= charx and self.x <= charx + charw + 30 then
+				if self.y + 50 >= chary and self.y <= chary + charh then
 					return true
 				else
 					return false
