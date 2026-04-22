@@ -3,33 +3,17 @@ button = require("button")
 carrot = require("carrot")
 
 math.randomseed(os.time())
-world = love.physics.newWorld(0, 9.81 * 64, true)
 
 -- main mavi charimiz
 char = {
-	height = 209,
-	width = 225,
-	speed = 130,
-	body = love.physics.newBody(world, 100, 100, "dynamic"),
-	shape = love.physics.newRectangleShape(160, 160),
-	--x = 100,
-	--y = 100,
+	height = 209, width = 225,
+	x = 100, y = 100,
+	speed = 150,
 }
-
-char.fixture = love.physics.newFixture(char.body, char.shape)
-
-ground = {
-	body = love.physics.newBody(world, 0, 900, "static"),
-	shape = love.physics.newRectangleShape(800, 50), 
-}
-
-ground.fixture = love.physics.newFixture(ground.body, ground.shape)
 
 gate = {
-	x = 1150,
-	y = 1170,
-	width = 300,
-	height = 50,
+	x = 1150, y = 1170,
+	width = 300, height = 50,
 }
 
 local buttons = {
@@ -58,13 +42,13 @@ function changeState(state)
 end
 
 function love.load()
-
+	heart = 3
 	--spriteSheet = love.graphics.newImage("gfx/fail-anim.png")
 
-	run_bg = love.graphics.newImage("gfx/bg-sur.png")
-	menu_bg = love.graphics.newImage("gfx/rect5.png")
-
-	char.sprite = love.graphics.newImage("gfx/char-bad.png")
+	run_bg = love.graphics.newImage("gfx/game-2.png")
+	menu_bg = love.graphics.newImage("gfx/menu-2.png")
+	char.sprite = love.graphics.newImage("gfx/blue-2.png")
+	heart_pic = love.graphics.newImage("gfx/heart.png")
 
 	font = love.graphics.newFont(40)
 	font2 = love.graphics.newFont(70)
@@ -82,12 +66,6 @@ end
 
 function love.update(dt)
 
-	char.x = char.body:getX()
-	char.y = char.body:getY()
-	char.body:setFixedRotation(true)
-
-	world:update(dt)
-
 	mouse_x, mouse_y = love.mouse.getPosition()
 
 -- play click edende
@@ -96,22 +74,18 @@ function love.update(dt)
 	end
 
 -- char move
-	vx, vy = char.body:getLinearVelocity()
-	--[[if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
+	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
 		char.y = char.y - char.speed*dt
 	end
 	if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
 		char.y = char.y + char.speed*dt
-	end ]]--
+	end
 	if love.keyboard.isDown("a") or love.keyboard.isDown("left") then
-		vx = -char.speed
+		char.x = char.x - char.speed*dt
 	end
 	if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
-		vx = char.speed
-	else
-		vx = 0
+		char.x = char.x + char.speed*dt
 	end
-	char.body:setLinearVelocity(vx, vy)
 
 -- enemies de move 
 	for i = 1, #enemies do
@@ -133,9 +107,15 @@ function love.draw()
 		love.graphics.rectangle("fill", gate.x, gate.y, gate.width, gate.height)
 		love.graphics.draw(char.sprite, char.x, char.y)
 
+		for i = 1, heart do
+			love.graphics.draw(heart_pic, 1480 - 80*i, 15)
+		end
+
 		for i = 1, #enemies do
 			if enemies[i]:hit(char.x, char.y, char.width, char.height) then 
-				changeState("ended")
+				heart = heart - 1
+				love.graphics.setFont(font2)
+				love.graphics.print("LOST A HEART", 750, 600)
 			end
 		end
 
@@ -162,15 +142,6 @@ function love.draw()
 		love.graphics.setColor(250/255, 250/255, 250/255)
 		love.graphics.draw(menu_bg, 0, 0)
 		love.graphics.setColor(0, 0, 0)
-
-		love.graphics.setColor(50/255, 140/255, 200/255)
-		love.graphics.setFont(name_font)
-		love.graphics.setColor(0,0,0)
-		love.graphics.print("BAD GAME", 475, 155)
-
-
-		love.graphics.setColor(69/255, 127/255, 193/255)
-		love.graphics.print("BAD GAME", 470, 150)
 
 		buttons.menu_state.play:draw(650, 400, 200, 400)
 		buttons.menu_state.settings:draw(615, 550, 300, 400)

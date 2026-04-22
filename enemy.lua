@@ -4,7 +4,7 @@ function enemy()
 		level = 1,
 		x = 30,
 		y = 30,
-		sprite = love.graphics.newImage("gfx/enemybad.png"),
+		sprite = love.graphics.newImage("gfx/red-2.png"),
 		x = math.random(1, 18) * 80,
 		y= math.random(1, 15)* 80,
 
