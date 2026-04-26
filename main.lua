@@ -1,10 +1,8 @@
 enemy = require("enemy")
 button = require("button")
 carrot = require("carrot")
-
 math.randomseed(os.time())
 
--- main mavi charimiz
 char = {
 	height = 209, width = 225,
 	x = 100, y = 100,
@@ -18,7 +16,8 @@ gate = {
 
 local buttons = {
 	menu_state = {},
-	levels_state = {},
+	levels = {},
+	run_state = {},
 }
 
 game = {	
@@ -31,8 +30,7 @@ game = {
 	}
 }
 
-carrots = {}
-enemies = {}
+carrots, enemies = {}, {}
 
 function changeState(state)
 	game.state["running"] = state == "running"
@@ -41,25 +39,22 @@ function changeState(state)
 	game.state["paused"] = state == "paused"
 end
 
+
 function love.load()
 	heart = 3
-	--spriteSheet = love.graphics.newImage("gfx/fail-anim.png")
-
 	run_bg = love.graphics.newImage("gfx/game-2.png")
 	menu_bg = love.graphics.newImage("gfx/menu-2.png")
 	char.sprite = love.graphics.newImage("gfx/blue-2.png")
 	heart_pic = love.graphics.newImage("gfx/heart.png")
 
-	font = love.graphics.newFont(40)
-	font2 = love.graphics.newFont(70)
-	name_font = love.graphics.newFont("LoveDays-2v7Oe.ttf", 120)
+	font, font2 = love.graphics.newFont(40), love.graphics.newFont(70)
 
--- buttoncuklari elave edeyin
 	buttons.menu_state.play = button("PLAY", nil, nil, 150, 80)
 	buttons.menu_state.settings = button("SETTINGS", nil, nil, 230, 80)
 	buttons.menu_state.exit = button("EXIT", nil , nil, 150, 80)
+	buttons.run_state.pause = button("PAUSE", nil, nil, 170, 80)
+	buttons.run_state.replay = button("REPLAY", nil, nil, 190, 80)
 
--- bir dene enemi ve carrot elave edeyin
 	table.insert(enemies, 1, enemy())
 	table.insert(carrots, 1, carrot())
 end
@@ -68,29 +63,50 @@ function love.update(dt)
 
 	mouse_x, mouse_y = love.mouse.getPosition()
 
--- play click edende
-	if buttons.menu_state.play:hovering(mouse_x, mouse_y) and love.mouse.isDown(1) then
-		changeState("running")
+	function love.mousepressed(x, y, button)
+	 if button == 1 then
+        if game.state["menu"] then
+            if buttons.menu_state.play:hovering(x, y) then
+                changeState("running")
+            end
+        end
+
+    	if game.state["running"] then
+            if buttons.run_state.pause:hovering(x, y) then
+                changeState("paused")
+            end
+        end
+
+        if game.state["paused"] then
+        	if buttons.run_state.replay: hovering(x, y) then
+        		changeState("running")
+        	end
+        end
+    end
+end
+
+	-- char move
+	if game.state["running"] then
+		if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
+			char.y = char.y - char.speed*dt
+		end
+		if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
+			char.y = char.y + char.speed*dt
+		end
+		if love.keyboard.isDown("a") or love.keyboard.isDown("left") then
+			char.x = char.x - char.speed*dt
+		end
+		if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
+			char.x = char.x + char.speed*dt
+		end
 	end
 
--- char move
-	if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
-		char.y = char.y - char.speed*dt
-	end
-	if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
-		char.y = char.y + char.speed*dt
-	end
-	if love.keyboard.isDown("a") or love.keyboard.isDown("left") then
-		char.x = char.x - char.speed*dt
-	end
-	if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
-		char.x = char.x + char.speed*dt
-	end
-
--- enemies de move 
-	for i = 1, #enemies do
-		if char.x > 160 or char.y > 160 then
-				enemies[i]:move(char.x, char.y)
+	-- enemies de move 
+	if game.state["running"] then
+		for i = 1, #enemies do
+			if char.x > 160 or char.y > 160 then
+					enemies[i]:move(char.x, char.y)
+			end
 		end
 	end
 
@@ -100,15 +116,19 @@ function love.draw()
 
 	love.graphics.setFont(font)
 
--- oyun run edende -> enemy ve char
+	-- oyun run edende -> enemy ve char
 	if game.state["running"] then
-		love.graphics.printf("FPS: " .. love.timer.getFPS(), 10, 10, 100, "left")
+		
+		--love.graphics.printf("FPS: " .. love.timer.getFPS(), 10, 10, 100, "left")
 		love.graphics.draw(run_bg, 0, 0)
 		love.graphics.rectangle("fill", gate.x, gate.y, gate.width, gate.height)
 		love.graphics.draw(char.sprite, char.x, char.y)
 
+		buttons.run_state.pause:draw(1300, 30, 200, 400)
+		love.graphics.setColor(1, 1, 1)
+
 		for i = 1, heart do
-			love.graphics.draw(heart_pic, 1480 - 80*i, 15)
+			love.graphics.draw(heart_pic, 80*i, 15)
 		end
 
 		for i = 1, #enemies do
@@ -136,8 +156,10 @@ function love.draw()
 		end
 	end
 
+	if game.state["paused"] then
+		buttons.run_state.replay:draw(645, 550, 300, 400)	
+	end
 
--- menu olanda -> buttoncuklari cekirik
 	if game.state["menu"] then
 		love.graphics.setColor(250/255, 250/255, 250/255)
 		love.graphics.draw(menu_bg, 0, 0)
