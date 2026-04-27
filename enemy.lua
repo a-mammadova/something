@@ -1,12 +1,12 @@
 
 function enemy()
 	return {
-		level = 1,
-		x = 30,
-		y = 30,
 		sprite = love.graphics.newImage("gfx/red-2.png"),
+		level = 1,
 		x = math.random(1, 18) * 80,
 		y= math.random(1, 15)* 80,
+		w = 151,
+		h = 100,
 
 		move = function(self, charx, chary)
 			
@@ -29,12 +29,13 @@ function enemy()
 		end,
 
 		hit = function(self, charx, chary, charw, charh)
-			if self.x + 30>= charx and self.x <= charx + charw + 30 then
-				if self.y + 50 >= chary and self.y <= chary + charh then
-					return true
-				else
-					return false
-				end
+			if charx + charw - 70 <= self.x or
+			 self.x + self.w - 8 <= charx or
+			 self.y + self.h - 20 <= chary or
+			  chary + charh - 100 <= self.y then
+				return false
+			else
+				return true
 			end
 		end,
 	}

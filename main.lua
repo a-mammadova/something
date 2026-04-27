@@ -146,7 +146,7 @@ end
 		end
 	end
 
-	if score < 0 and heart == 0 then
+	if score < 0 or heart == 0 then
 		changeState("ended")
 	end
 
