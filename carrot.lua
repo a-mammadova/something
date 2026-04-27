@@ -7,7 +7,7 @@ function carrot()
 		y = math.random(1, 15) * 80,
 
 		draw = function(self, t)
-			love.graphics.draw(self.sprite, self.x, self.y + math.sin(time * 2) + 1)
+			love.graphics.draw(self.sprite, self.x, self.y + math.sin(time * 3) * 15 + 1)
 			love.graphics.setColor(199/255, 148/255, 209/200)
 		end,
 

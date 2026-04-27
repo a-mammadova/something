@@ -40,10 +40,14 @@ function changeState(state)
 	game.state["paused"] = state == "paused"
 end
 
+score = 0
+
 function resetGame()
 
 	char.x, char.y, heart = 100, 100, 3
 	carrots, enemies, time = {}, {}, 0
+
+	score = 0
 
 	table.insert(carrots, 1, carrot())
 	table.insert(enemies, enemy())
@@ -73,6 +77,16 @@ function love.update(dt)
 
 	time = time + dt
 	mouse_x, mouse_y = love.mouse.getPosition()
+
+	currentSecond = math.floor(time)
+
+	if currentSecond ~= lastSecond then
+		lastSecond = currentSecond
+
+    	if currentSecond % 1 == 0 then
+       		score = score + 1
+   		end
+	end
 
 	function love.mousepressed(x, y, button)
 	 if button == 1 then
@@ -134,12 +148,22 @@ function love.draw()
 
 	love.graphics.setFont(font)
 
-	-- oyun run edende -> enemy ve char
+	-- RUNNING
 	if game.state["running"] then
 		
-		--love.graphics.printf("FPS: " .. love.timer.getFPS(), 10, 10, 100, "left")
 		love.graphics.draw(run_bg, 0, 0)
+		love.graphics.printf("FPS:" .. love.timer.getFPS(), 10, 1080, 200, "justify")
+
+		--SCORE
+		love.graphics.setColor(120/255, 34/255, 100/255)
+		love.graphics.rectangle("fill", 600, 30, 300, 50)
+		love.graphics.setColor(1, 1, 1)
+		love.graphics.printf("SCORE: " ..score, 600, 30, 300, "center")
+
+		--GATE
 		love.graphics.rectangle("fill", gate.x, gate.y, gate.width, gate.height)
+
+		--HEART
 		for i = 1, heart do
 			love.graphics.draw(heart_pic, 80*i, 15)
 		end
@@ -156,6 +180,7 @@ function love.draw()
 
 		for i = #carrots, 1, -1 do
 			if carrots[i]:eaten(char.x, char.y, char.width, char.height) then
+				score = score + 10
 				table.remove(carrots, i)
 				table.insert(carrots, 1, carrot())
 			end
