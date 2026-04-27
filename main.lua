@@ -19,10 +19,10 @@ local buttons = {
 	levels = {},
 	run_state = {},
 	pause_state = {},
+	end_state = {},
 }
 
 game = {	
-	difficulty = 1,
 	state = {
 		menu = true,
 		paused = false,
@@ -66,9 +66,11 @@ function love.load()
 	buttons.menu_state.play = button("PLAY", nil, nil, 150, 80)
 	buttons.menu_state.settings = button("SETTINGS", nil, nil, 230, 80)
 	buttons.menu_state.exit = button("EXIT", nil , nil, 150, 80)
-	buttons.run_state.pause = button("PAUSE", nil, nil, 170, 80)
+	buttons.run_state.pause = button("II", nil, nil, 75, 80)
 	buttons.pause_state.continue = button("CONTINUE", nil, nil, 250, 80)
 	buttons.pause_state.replay = button("REPLAY", nil, nil, 190, 80)
+	buttons.end_state.restart = button("RESTART", nil, nil, 220, 80)
+	buttons.end_state.menu = button("MENU", nil, nil, 170, 80)
 
 	table.insert(enemies, 1, enemy())
 	table.insert(carrots, 1, carrot())
@@ -94,29 +96,26 @@ function love.update(dt)
 
 	function love.mousepressed(x, y, button)
 	 if button == 1 then
-        if game.state["menu"] then
-            if buttons.menu_state.play:hovering(x, y) then
-                changeState("running")
-            end
+        if buttons.menu_state.play:hovering(x, y) then
+            changeState("running")
         end
 
-    	if game.state["running"] then
-            if buttons.run_state.pause:hovering(x, y) then
-                changeState("paused")
-            end
+        if buttons.run_state.pause:hovering(x, y) then
+           changeState("paused")
         end
 
-        if game.state["paused"] then
-        	if buttons.pause_state.continue:hovering(x, y) then
-        		changeState("running")
-        	end
+      	if buttons.pause_state.continue:hovering(x, y) then
+        	changeState("running")
         end
 
-        if game.state["paused"] then
-        	if buttons.pause_state.replay:hovering(x, y) then
-        		resetGame()
-        		changeState("running")
-        	end
+        if buttons.pause_state.replay:hovering(x, y) or
+        buttons.end_state.restart:hovering(x, y) then
+        	resetGame()
+        	changeState("running")
+        end
+
+        if buttons.end_state.menu:hovering(x, y) then
+        	changeState("menu")
         end
     end
 end
@@ -147,7 +146,7 @@ end
 		end
 	end
 
-	if score < 0 or heart == 0 then
+	if score < 0 and heart == 0 then
 		changeState("ended")
 	end
 
@@ -183,7 +182,7 @@ function love.draw()
 		for i = 1, heart do
 			love.graphics.draw(heart_pic, 80*i, 15)
 		end
-		buttons.run_state.pause:draw(1300, 30, 200, 400)
+		buttons.run_state.pause:draw(1400, 30, 200, 400)
 		love.graphics.setColor(1, 1, 1)
 
 		offset_y = math.sin(time * 3) * 10 
@@ -231,8 +230,10 @@ function love.draw()
 	if game.state["ended"] then
 		love.graphics.setColor(1, 0, 0)
 		love.graphics.setFont(font2)
-		love.graphics.printf("GAME OVER !", 450, 500, 600, "center")
+		--love.graphics.printf("GAME OVER !", 450, 400, 600, "center")
 		love.graphics.setColor(1, 1, 1)
+		buttons.end_state.restart:draw(620, 480, 200, 400)
+		buttons.end_state.menu:draw(645, 600, 200, 400)
 		--love.graphics.draw()
 	end
 
