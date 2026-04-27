@@ -1,8 +1,8 @@
 function carrot() 
 	return {
 		sprite = love.graphics.newImage("gfx/carrot.png"),
-		height = 100,
-		width = 45,
+		h = 100,
+		w = 45,
 		x = math.random(1, 18) * 80,
 		y = math.random(1, 15) * 80,
 
@@ -12,14 +12,13 @@ function carrot()
 		end,
 
 		eaten = function(self, charx, chary, charw, charh)
-			if self.x >= charx and self.x <= charx + charw then
-				if self.y >= chary and self.y <= chary + charh then
-					return true
-				else
-					return false
-				end
-			else
+			if charx + charw - 70 <= self.x or
+			 self.x + self.w - 8 <= charx or
+			 self.y + self.h - 20 <= chary or
+			  chary + charh - 100 <= self.y then
 				return false
+			else
+				return true
 			end
 		end,
 
