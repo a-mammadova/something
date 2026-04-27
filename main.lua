@@ -60,8 +60,10 @@ function love.load()
 	menu_bg = love.graphics.newImage("gfx/menu-2.png")
 	char.sprite = love.graphics.newImage("gfx/blue-2.png")
 	heart_pic = love.graphics.newImage("gfx/heart.png")
+	over_bg = love.graphics.newImage("gfx/over.png")
 
 	font, font2 = love.graphics.newFont(40), love.graphics.newFont(70)
+	font3 = love.graphics.newFont(100)
 
 	buttons.menu_state.play = button("PLAY", nil, nil, 150, 80)
 	buttons.menu_state.settings = button("SETTINGS", nil, nil, 230, 80)
@@ -86,7 +88,7 @@ function love.update(dt)
 
 	currentSecond = math.floor(time)
 
-	if started == true and currentSecond ~= lastSecond then
+	if started == true and currentSecond ~= lastSecond and game.state["running"] then
 		lastSecond = currentSecond
 
     	if currentSecond % 1 == 0 then
@@ -206,15 +208,13 @@ function love.draw()
 		for i = 1, #enemies do
 			if enemies[i]:hit(char.x, char.y, char.width, char.height) and hit_timer <= 0 then 
 				heart = heart - 1
-				love.graphics.setFont(font2)
-				love.graphics.print("LOST A HEART", 750, 600)
 				score = score - 20
 				hit_timer = 1
 			end
 		end
 
 		if hit_timer > 0 then
-			love.graphics.setColor(1, 0, 0, 0.1)
+			love.graphics.setColor(1, 0, 0, 0.15)
 			love.graphics.rectangle("fill", 0, 0, 1500, 1200)
 		else
 			love.graphics.setColor(1, 1, 1)
@@ -228,9 +228,24 @@ function love.draw()
 	end
 
 	if game.state["ended"] then
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.draw(over_bg, 0, 0)
 		love.graphics.setColor(1, 0, 0)
+		love.graphics.setFont(font)
+		love.graphics.printf("SCORE: "..score, 450, 200, 600, "center")
+
 		love.graphics.setFont(font2)
-		--love.graphics.printf("GAME OVER !", 450, 400, 600, "center")
+		if score <= 0 then
+			love.graphics.printf(score .."? seriously? bruh.", 300, 280, 900, "center"  )
+		end
+		if score < 100 and score > 0 then
+			love.graphics.printf("mediocre", 300, 280, 900, "center"  )
+		end
+
+		if score >= 100 then
+			love.graphics.printf("even i can't go that far, lol", 300, 280, 900, "center"  )
+		end
+
 		love.graphics.setColor(1, 1, 1)
 		buttons.end_state.restart:draw(620, 480, 200, 400)
 		buttons.end_state.menu:draw(645, 600, 200, 400)
