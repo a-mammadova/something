@@ -47,13 +47,14 @@ function resetGame()
 	char.x, char.y, heart = 100, 100, 3
 	carrots, enemies, time = {}, {}, 0
 
-	score = 0
+	score, started = 0, false
 
 	table.insert(carrots, 1, carrot())
 	table.insert(enemies, enemy())
 end
 
 function love.load()
+	hit_timer = 0
 	heart = 3
 	run_bg = love.graphics.newImage("gfx/game-2.png")
 	menu_bg = love.graphics.newImage("gfx/menu-2.png")
@@ -76,11 +77,14 @@ end
 function love.update(dt)
 
 	time = time + dt
+
+	hit_timer = hit_timer - dt
+
 	mouse_x, mouse_y = love.mouse.getPosition()
 
 	currentSecond = math.floor(time)
 
-	if currentSecond ~= lastSecond then
+	if started == true and currentSecond ~= lastSecond then
 		lastSecond = currentSecond
 
     	if currentSecond % 1 == 0 then
@@ -138,8 +142,13 @@ end
 		for i = 1, #enemies do
 			if char.x > 160 or char.y > 160 then
 					enemies[i]:move(char.x, char.y)
+					started = true
 			end
 		end
+	end
+
+	if score < 0 or heart == 0 then
+		changeState("ended")
 	end
 
 end
@@ -161,7 +170,14 @@ function love.draw()
 		love.graphics.printf("SCORE: " ..score, 600, 30, 300, "center")
 
 		--GATE
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.rectangle("fill", gate.x - 10, gate.y - 10,
+		 gate.width + 20, gate.height + 10)
+		love.graphics.setColor(139/255, 69/255, 19/255)
 		love.graphics.rectangle("fill", gate.x, gate.y, gate.width, gate.height)
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.circle("line", gate.x + gate.width / 2, gate.y + gate.height / 3, 6)
+		love.graphics.setColor(1, 1, 1)
 
 		--HEART
 		for i = 1, heart do
@@ -189,17 +205,35 @@ function love.draw()
 		love.graphics.pop()
 
 		for i = 1, #enemies do
-			if enemies[i]:hit(char.x, char.y, char.width, char.height) then 
+			if enemies[i]:hit(char.x, char.y, char.width, char.height) and hit_timer <= 0 then 
 				heart = heart - 1
 				love.graphics.setFont(font2)
 				love.graphics.print("LOST A HEART", 750, 600)
+				score = score - 20
+				hit_timer = 1
 			end
 		end
+
+		if hit_timer > 0 then
+			love.graphics.setColor(1, 0, 0, 0.1)
+			love.graphics.rectangle("fill", 0, 0, 1500, 1200)
+		else
+			love.graphics.setColor(1, 1, 1)
+		end
+
 
 		for i = 1, #enemies do
 			enemies[i]:draw()
 		end
 
+	end
+
+	if game.state["ended"] then
+		love.graphics.setColor(1, 0, 0)
+		love.graphics.setFont(font2)
+		love.graphics.printf("GAME OVER !", 450, 500, 600, "center")
+		love.graphics.setColor(1, 1, 1)
+		--love.graphics.draw()
 	end
 
 	if game.state["paused"] then
