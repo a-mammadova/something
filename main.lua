@@ -6,7 +6,7 @@ math.randomseed(os.time())
 char = {
 	height = 209, width = 225,
 	x = 100, y = 100,
-	speed = 150,
+	speed = 200,
 }
 
 gate = {
@@ -18,6 +18,7 @@ local buttons = {
 	menu_state = {},
 	levels = {},
 	run_state = {},
+	pause_state = {},
 }
 
 game = {	
@@ -30,7 +31,7 @@ game = {
 	}
 }
 
-carrots, enemies = {}, {}
+carrots, enemies, time = {}, {}, 0
 
 function changeState(state)
 	game.state["running"] = state == "running"
@@ -39,6 +40,14 @@ function changeState(state)
 	game.state["paused"] = state == "paused"
 end
 
+function resetGame()
+
+	char.x, char.y, heart = 100, 100, 3
+	carrots, enemies, time = {}, {}, 0
+
+	table.insert(carrots, 1, carrot())
+	table.insert(enemies, enemy())
+end
 
 function love.load()
 	heart = 3
@@ -53,7 +62,8 @@ function love.load()
 	buttons.menu_state.settings = button("SETTINGS", nil, nil, 230, 80)
 	buttons.menu_state.exit = button("EXIT", nil , nil, 150, 80)
 	buttons.run_state.pause = button("PAUSE", nil, nil, 170, 80)
-	buttons.run_state.replay = button("REPLAY", nil, nil, 190, 80)
+	buttons.pause_state.continue = button("CONTINUE", nil, nil, 250, 80)
+	buttons.pause_state.replay = button("REPLAY", nil, nil, 190, 80)
 
 	table.insert(enemies, 1, enemy())
 	table.insert(carrots, 1, carrot())
@@ -61,6 +71,7 @@ end
 
 function love.update(dt)
 
+	time = time + dt
 	mouse_x, mouse_y = love.mouse.getPosition()
 
 	function love.mousepressed(x, y, button)
@@ -78,7 +89,14 @@ function love.update(dt)
         end
 
         if game.state["paused"] then
-        	if buttons.run_state.replay: hovering(x, y) then
+        	if buttons.pause_state.continue:hovering(x, y) then
+        		changeState("running")
+        	end
+        end
+
+        if game.state["paused"] then
+        	if buttons.pause_state.replay:hovering(x, y) then
+        		resetGame()
         		changeState("running")
         	end
         end
@@ -122,14 +140,28 @@ function love.draw()
 		--love.graphics.printf("FPS: " .. love.timer.getFPS(), 10, 10, 100, "left")
 		love.graphics.draw(run_bg, 0, 0)
 		love.graphics.rectangle("fill", gate.x, gate.y, gate.width, gate.height)
-		love.graphics.draw(char.sprite, char.x, char.y)
-
-		buttons.run_state.pause:draw(1300, 30, 200, 400)
-		love.graphics.setColor(1, 1, 1)
-
 		for i = 1, heart do
 			love.graphics.draw(heart_pic, 80*i, 15)
 		end
+		buttons.run_state.pause:draw(1300, 30, 200, 400)
+		love.graphics.setColor(1, 1, 1)
+
+		offset_y = math.sin(time * 3) * 10 
+		love.graphics.push()
+		love.graphics.draw(char.sprite, char.x, char.y + offset_y)
+
+		for i = 1, #carrots do
+			carrots[i]:draw(time)
+		end
+
+		for i = #carrots, 1, -1 do
+			if carrots[i]:eaten(char.x, char.y, char.width, char.height) then
+				table.remove(carrots, i)
+				table.insert(carrots, 1, carrot())
+			end
+		end
+
+		love.graphics.pop()
 
 		for i = 1, #enemies do
 			if enemies[i]:hit(char.x, char.y, char.width, char.height) then 
@@ -143,21 +175,11 @@ function love.draw()
 			enemies[i]:draw()
 		end
 
-		for i = 1, #carrots do
-			carrots[i]:draw()
-		end
-
-		for i = #carrots, 1, -1 do
-			if carrots[i]:eaten(char.x, char.y, char.width, char.height) then
-				love.graphics.setFont(font)
-				love.graphics.setColor(140/255, 40/255, 60/255)
-				table.remove(carrots, i)
-			end
-		end
 	end
 
 	if game.state["paused"] then
-		buttons.run_state.replay:draw(645, 550, 300, 400)	
+		buttons.pause_state.continue:draw(635, 550, 300, 400)	
+		buttons.pause_state.replay:draw(660, 430, 300, 400)
 	end
 
 	if game.state["menu"] then
