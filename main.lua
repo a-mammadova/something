@@ -33,10 +33,14 @@ game = {
 }
 
 levels = {
-	[1] = {carrot_req = 5, enemy_count = 1, target_score = 40, },
+	[1] = {carrot_req = 3, enemy_count = 1, target_score = 40, },
 	[2] = {carrot_req = 2, enemy_count = 2, target_score = 80, },
-	[3] = {carrot_req = 2, enemy_count = 1, target_score = 120, },
+	[3] = {carrot_req = 2, enemy_count = 2, target_score = 120, },
 }
+
+level_text = ""
+level_text_timer = 0
+
 carrots, enemies, time, eaten_carrots, score = {}, {}, 0, 0, 0
 
 final_level = #levels
@@ -70,6 +74,11 @@ last_second = 0
 function loadLevel(level) 
 	eaten_carrots, started = 0, false
 	carrots, enemies, heart = {}, {}, 3
+
+	level_text = "collect "..levels[level].carrot_req..
+             " carrots & reach "..levels[level].target_score.." score"
+
+	level_text_timer = 3
 	char.x, char.y = 100, 100
 
 	for i = 1, levels[level].carrot_req do
@@ -140,6 +149,10 @@ function love.load()
 end
 
 function love.update(dt)
+
+	if level_text_timer > 0 then
+		level_text_timer = level_text_timer - dt
+	end
 
 	time, hit_timer = time + dt, hit_timer - dt
 
@@ -279,6 +292,16 @@ function love.draw()
 		love.graphics.printf("LEVEL: " ..current_level, 335, 25, 300, "center")
 		love.graphics.setColor(1, 1, 1)
 
+		if level_text_timer > 0 then
+    		love.graphics.setFont(font)
+    		love.graphics.setColor(0, 0, 0, 0.7 * math.min(level_text_timer / 3, 1))
+    		love.graphics.rectangle("fill", 400, 200, 700, 100)
+
+    		love.graphics.setColor(1, 1, 1, math.min(level_text_timer / 3, 1))
+    		love.graphics.printf(level_text, 400, 220, 700, "center")
+    		love.graphics.setColor(1, 1, 1)
+		end
+
 	end
 
 	if game.state["ended"] then
@@ -320,8 +343,8 @@ function love.draw()
 	end
 
 	if game.state["paused"] then
-		buttons.pause_state.continue:draw(635, 550, 300, 400)	
-		buttons.pause_state.replay:draw(660, 430, 300, 400)
+		buttons.pause_state.continue:draw(635, 520, 300, 380)	
+		buttons.pause_state.replay:draw(660, 400, 300, 400)
 	end
 
 	if game.state["menu"] then
