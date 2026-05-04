@@ -20,7 +20,7 @@ function enemy()
 			if chary - self.y > 0 then
 				self.y = self.y + self.speed
 			elseif chary - self.y < 0 then
-				self.y = self.y - self.speed
+				self.y = self.y - self.level/1.7
 			end
 		end,
 

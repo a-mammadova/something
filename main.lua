@@ -130,7 +130,7 @@ function love.load()
 	heart_pic = love.graphics.newImage("gfx/heart.png")
 	over_bg = love.graphics.newImage("gfx/over.png")
 
-	a = "font-13.ttf"
+	a = "fonts/font-13.ttf"
 	font = love.graphics.newFont(a, 50)
 	font2 = love.graphics.newFont(a, 80)
 	font3 = love.graphics.newFont(a, 110)
