@@ -12,13 +12,13 @@ function enemy()
 		move = function(self, charx, chary)
 			
 			if charx - self.x > 0 then
-				self.x = self.x + self.speed
+				self.x = self.x + self.level/1.7
 			elseif charx - self.x < 0 then
-				self.x = self.x - self.speed
+				self.x = self.x - self.level/1.7
 			end
 
 			if chary - self.y > 0 then
-				self.y = self.y + self.speed
+				self.y = self.y + self.level/1.7
 			elseif chary - self.y < 0 then
 				self.y = self.y - self.level/1.7
 			end
