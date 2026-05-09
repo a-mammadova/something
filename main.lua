@@ -52,6 +52,7 @@ function changeState(state)
 	game.state["ended"] = state == "ended"
 	game.state["paused"] = state == "paused"
 	game.state["won"] = state == "won"
+	game.state["settings"] = state == "settings"
 end
 
 function reachedGate()
@@ -103,33 +104,37 @@ end
 current_level = 1
 
 function love.mousepressed(x, y, button)
-	 if button == 1 then
-        if buttons.menu_state.play:hovering(x, y) then
-        		current_level = 1
-        		loadLevel(current_level)
-            changeState("running")
-        end
+	if button == 1 then
+      if buttons.menu_state.play:hovering(x, y) then
+        	current_level = 1
+        	loadLevel(current_level)
+         changeState("running")
+      end
 
-        if buttons.run_state.pause:hovering(x, y) then
-           changeState("paused")
-        end
+      if buttons.menu_state.settings:hovering(x, y) then
+      	changeState("settings")
+      end
 
-      	if buttons.pause_state.continue:hovering(x, y) then
+      if buttons.run_state.pause:hovering(x, y) then
+         changeState("paused")
+      end
+
+      if buttons.pause_state.continue:hovering(x, y) then
         	changeState("running")
-        end
+      end
 
-        if buttons.pause_state.replay:hovering(x, y) or
+      if buttons.pause_state.replay:hovering(x, y) or
         buttons.end_state.restart:hovering(x, y) then
         	resetGame()
         	changeState("running")
-        end
+      end
 
-        if buttons.end_state.menu:hovering(x, y) then
+      if buttons.end_state.menu:hovering(x, y) then
         	resetGame()
         	changeState("menu")
-        end
-    end
+      end
    end
+end
 
 function love.load()
 
@@ -418,5 +423,10 @@ function love.draw()
 	if game.state["won"] then
 		love.graphics.setFont(font4)
 		love.graphics.printf("YOU WON!", 300, 480, 900, "center")
+	end
+
+	if game.state["settings"] then
+		-- add sfx on off
+		-- add ctrls
 	end
 end
